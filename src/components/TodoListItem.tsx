@@ -2,11 +2,11 @@
 //@ts-nocheck
 import React, {useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {completeTaskThunk, removeTask, updateTaskThunk} from "../store/reducers/tasks";
 import {RootState} from "../store/reducers";
+import {completeTodo, deleteTodo, updateTodo} from "../features/todos/todosSlice";
 
 const selectorTodoById = (state, todoId) => {
-    return state.tasks.tasks.find(task => task.id === todoId);
+    return state.todos.todos.find(todo => todo.id === todoId);
 };
 
 interface TodoListItemProps {
@@ -19,12 +19,14 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
     const { text, completed } = todo;
     const dispatch = useDispatch();
 
+
+    //todo next
     const handleCompleted = () => {
-        dispatch(completeTaskThunk(id));
+        dispatch(completeTodo(id));
     };
 
     const handleDelete = () => {
-        dispatch(removeTask(id));
+        dispatch(deleteTodo(id));
     };
 
     const [input, setInput] = useState(text);
@@ -35,7 +37,7 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
         }
         if (event.key === "Enter" && input) {
             const trimmedText = input.trim();
-            dispatch(updateTaskThunk(id, trimmedText));
+            dispatch(updateTodo(id, trimmedText));
             setInputToggle(!inputToggle);
         }
         if (event.key === "Escape") {

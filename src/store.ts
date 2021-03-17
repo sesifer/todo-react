@@ -1,20 +1,15 @@
 import {configureStore} from "@reduxjs/toolkit";
-import {tasksReducer} from "./store/reducers/tasks";
-import filtersReducer from "./features/filters/filtersSlice";
-
-// const store = createStore(
-//     rootReducer,
-//     composeWithDevTools(
-//         applyMiddleware(thunk),
-//     )
-// );
-//
+import {filtersSlice} from "./features/filters/filtersSlice";
+import {todosSlice} from "./features/todos/todosSlice";
 
 const store = configureStore({
     reducer: {
-        tasks: tasksReducer,
-        filters: filtersReducer,
+        todos: todosSlice.reducer,
+        filters: filtersSlice.reducer
     }
 });
 
+export type RootState = ReturnType<typeof store.getState>
+
 export default store;
+

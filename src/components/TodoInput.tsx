@@ -1,25 +1,31 @@
-
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {useDispatch} from "react-redux";
-import {fetchTasks, saveTask, updateTaskThunk} from "../store/reducers/tasks";
+import {addNewTodo} from "../features/todos/todosSlice";
 
-interface TodoInputProps {
-    id?: string;
-    text?: string;
-}
-
-const TodoInput = ({ id, text }  :TodoInputProps) => {
-    const [input, setInput] = useState(text);
+const TodoInput = () => {
+    const [input, setInput] = useState("");
+    const [requestStatus, setRequestStatus] = useState("idle");
     const dispatch = useDispatch();
 
     const handleKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === "Enter" && input) {
+        if (event.key === "Enter" && input && requestStatus === "idle") {
             const trimmedText = input.trim();
-            await dispatch(saveTask(trimmedText));
-            setInput("");
+
+            try {
+                setRequestStatus("loading");
+                await dispatch(addNewTodo(trimmedText));
+                // unwrapResult(resultAction);
+                setInput("");
+            } catch (e) {
+                console.warn(e);
+            } finally {
+                setRequestStatus("idle");
+            }
         }
     };
 
+    const isLoading = requestStatus === "loading";
+    
     return(
         <div>
             <input
@@ -28,8 +34,10 @@ const TodoInput = ({ id, text }  :TodoInputProps) => {
                 value={input}
                 type="text"
                 name="todo"
-                placeholder="What needs to be done?"
+                placeholder={isLoading ? "" : "What needs to be done?"}
+                disabled={isLoading}
             />
+            {isLoading ? <div>Loading...</div> : null}
         </div>
     );
 };

@@ -2,8 +2,6 @@
 //@ts-nocheck
 import React from "react";
 import CompletedTasksCounter from "./CompletedTodosCounter";
-import {RootState} from "../store/reducers";
-import {Task} from "../store/types";
 
 const TodoListFooter = ():JSX.Element => {
 

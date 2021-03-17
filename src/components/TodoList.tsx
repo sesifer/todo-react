@@ -2,12 +2,12 @@
 // @ts-ignore
 import React, {ReactElement, useEffect} from "react";
 import {shallowEqual, useDispatch, useSelector} from "react-redux";
-import {Task} from "../store/types";
+import {Todo, TodosState} from "../store/types";
 import TodoInput from "./TodoInput";
-import {RootState} from "../store/reducers";
 import TodoListItem from "./TodoListItem";
-import {fetchTasks} from "../store/reducers/tasks";
 import TodoListFooter from "./TodoListFooter";
+import {fetchTodos} from "../features/todos/todosSlice";
+import {RootState} from "../store";
 
 const statusFiltersKeys = [
     "all",
@@ -15,24 +15,28 @@ const statusFiltersKeys = [
     "completed",
 ];
 
-const selectorTaskIds = (state: RootState) => state.tasks.tasks.map((task: Task) => task.id);
+const selectorTodoIds = (state: RootState) => state.todos.todos.map((todo: Todo) => todo.id);
 const selectorCompletedTodos = (state: RootState) => {
-    return state.tasks.tasks.filter(task => task.completed);
+    return state.todos.todos.filter(todo => todo.completed);
 };
 
 const TodoList = (): ReactElement => {
     const dispatch = useDispatch();
+    const todosStatus = useSelector((state: RootState) => state.todos.status);
+    const error = useSelector((state: RootState) => state.todos.error);
 
     useEffect(() => {
-        dispatch(fetchTasks());
-    }, [dispatch]);
+        if (todosStatus === "idle") {
+            dispatch(fetchTodos());
+        }
+    }, [todosStatus, dispatch]);
 
     //taskId by mali byt dynamicky generovane podla filtra
     //takze selector musi byt dynamicke generovany podla toho, ktory filter je v STATE
-    const taskIds = useSelector(selectorTaskIds, shallowEqual);
+    const todoIds = useSelector(selectorTodoIds, shallowEqual);
 
     const renderTasks = () => {
-        return taskIds.map((taskId: string) => <TodoListItem key={`todo-${taskId}`} id={taskId} />);
+        return todoIds.map((id: string) => <TodoListItem key={`todo-${id}`} id={id} />);
     };
 
     const handleClick = (key: string) => {
@@ -47,24 +51,26 @@ const TodoList = (): ReactElement => {
         // }
     };
 
-    const renderFilterButtons = () => {
-        statusFiltersKeys.map((key) => {
-            return <li key={`filter-${key}`}>
-                <button onClick={handleClick(key)}>{key}</button>
-            </li>;
-        });
-    };
+    // const renderFilterButtons = () => {
+    //     statusFiltersKeys.map((key) => {
+    //         return <li key={`filter-${key}`}>
+    //             <button onClick={handleClick(key)}>{key}</button>
+    //         </li>;
+    //     });
+    // };
 
     return (
         <div>
             {/*<ListHeader/>*/}
             <TodoInput />
             <ul>
-                {renderTasks()}
+                {(todosStatus === "loading") ? <div>Loading...</div> : ""}
+                {(todosStatus === "succeeded") ? renderTasks() : ""}
+                {(todosStatus === "failed") ? <div>{error}</div> : ""}
             </ul>
             {/*<Filter />*/}
             <ul>
-                {renderFilterButtons}
+                {/*{renderFilterButtons}*/}
             </ul>
             {/*<span>Clear completed</span>*/}
             <TodoListFooter/>
