@@ -1,7 +1,7 @@
 import {useSelector} from "react-redux";
 import {createSelector} from "reselect";
 import React, {useMemo} from "react";
-import {Todo} from "../store/types";
+import {Todo} from "../features/todos/types";
 import {RootState} from "../store";
 
 const makeSelectorCompletedTodosCount = () =>

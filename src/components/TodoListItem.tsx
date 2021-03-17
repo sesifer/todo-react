@@ -17,12 +17,12 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
     const [inputToggle, setInputToggle] = useState(false);
     const todo = useSelector((state: RootState) => selectorTodoById(state, id));
     const { text, completed } = todo;
+    const [isTodoCompleted, toggleCompleted] = useState(completed);
     const dispatch = useDispatch();
 
-
-    //todo next
     const handleCompleted = () => {
-        dispatch(completeTodo(id));
+        toggleCompleted(!isTodoCompleted);
+        dispatch(completeTodo({id, isTodoCompleted}));
     };
 
     const handleDelete = () => {
@@ -36,8 +36,8 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
             setInputToggle(!inputToggle);
         }
         if (event.key === "Enter" && input) {
-            const trimmedText = input.trim();
-            dispatch(updateTodo(id, trimmedText));
+            const text = input.trim();
+            dispatch(updateTodo({id, text}));
             setInputToggle(!inputToggle);
         }
         if (event.key === "Escape") {
@@ -51,7 +51,7 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
             <input
                 type={"checkbox"}
                 onChange={handleCompleted}
-                checked={completed}
+                checked={isTodoCompleted}
                 disabled={inputToggle}
             />
             {inputToggle
