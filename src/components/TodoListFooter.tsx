@@ -1,20 +1,36 @@
 import React from "react";
 import CompletedTasksCounter from "./CompletedTodosCounter";
+import styled from "@emotion/styled";
+
+const CountersContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin: 1em;
+  padding: 1em;
+`;
+
+const Counter = styled.span`
+  display: flex;
+  padding: 0.5em;
+  & first-child {
+  padding-right: 0.5em;
+}
+`;
 
 const TodoListFooter = ():JSX.Element => {
 
     return (
-        <div>
-            List Footer
-            <span>
+        <CountersContainer>
+            <Counter>
                 <CompletedTasksCounter completed={true} />
-                items to do
-            </span>
-            <span>
+                <span>items done</span>
+            </Counter>
+            <Counter>
                 <CompletedTasksCounter completed={false} />
-                items left
-            </span>
-        </div>
+                <span>items left</span>
+            </Counter>
+            //todo zmen favicon
+        </CountersContainer>
     );
 };
 

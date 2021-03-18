@@ -1,35 +1,39 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-nocheck
 import React, {useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../store/reducers";
-import {completeTodo, deleteTodo, updateTodo} from "../features/todos/todosSlice";
-
-const selectorTodoById = (state, todoId) => {
-    return state.todos.todos.find(todo => todo.id === todoId);
-};
+import {completeTodo, deleteTodo, selectTodoById, updateTodo} from "../features/todos/todosSlice";
+import {RootState, useAppDispatch} from "../store";
+import {useSelector} from "react-redux";
+import {unwrapResult} from "@reduxjs/toolkit";
+import Notification from "./Notification";
 
 interface TodoListItemProps {
     id: string;
 }
 
 const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
+    const dispatch = useAppDispatch();
+    const todo = useSelector((state: RootState) => selectTodoById(state, id));
     const [inputToggle, setInputToggle] = useState(false);
-    const todo = useSelector((state: RootState) => selectorTodoById(state, id));
-    const { text, completed } = todo;
-    const [isTodoCompleted, toggleCompleted] = useState(completed);
-    const dispatch = useDispatch();
+    const [isTodoCompleted, toggleCompleted] = useState(!!todo?.completed);
+    const [input, setInput] = useState(todo?.text);
+    const [requestStatus, setRequestStatus] = useState("idle");
 
     const handleCompleted = () => {
         toggleCompleted(!isTodoCompleted);
         dispatch(completeTodo({id, isTodoCompleted}));
     };
 
-    const handleDelete = () => {
-        dispatch(deleteTodo(id));
+    const handleDelete = async () => {
+        try {
+            setRequestStatus("loading");
+            const resultAction = await dispatch(deleteTodo(id));
+            unwrapResult(resultAction);
+        } catch (e) {
+            setRequestStatus("failed");
+        } finally {
+            setRequestStatus("idle");
+        }
     };
 
-    const [input, setInput] = useState(text);
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === "Enter" && input === "") {
             handleDelete();
@@ -41,10 +45,13 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
             setInputToggle(!inputToggle);
         }
         if (event.key === "Escape") {
-            setInput(text);
+            setInput(todo?.text);
             setInputToggle(!inputToggle);
         }
     };
+
+    const isLoading = requestStatus === "loading";
+    const isFailed = requestStatus === "failed";
 
     return (
         <div>
@@ -63,11 +70,14 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
                     name="todoEdit"
                     placeholder="What needs to be done?"
                 />
-                :<React.Fragment>
+                : <React.Fragment>
                     <span onDoubleClick={() => setInputToggle(!inputToggle)}>{input}</span>
                     <button onClick={handleDelete}>X</button>
                 </React.Fragment>
             }
+            {/*todo pouzi nieco ako NICO notifikaciu na 2 sekundy*/}
+            {isLoading ? <Notification /> : null}
+            {isFailed ? <div>Ooops...</div> : null}
         </div>
     );
 };

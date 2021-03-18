@@ -1,18 +1,19 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import React, {ReactElement, useEffect, useState} from "react";
-import {shallowEqual, useDispatch, useSelector} from "react-redux";
-import {Todo} from "../features/todos/types";
+import React, {ReactElement, useEffect} from "react";
+import {useSelector} from "react-redux";
 import TodoInput from "./TodoInput";
 import TodoListItem from "./TodoListItem";
 import TodoListFooter from "./TodoListFooter";
-import {deleteTodo, fetchTodos, selectorCompletedTodos, selectorTodoIds} from "../features/todos/todosSlice";
-import {RootState} from "../store";
+import {deleteTodo, fetchTodos, selectFilteredTodoIds, selectorCompletedTodos} from "../features/todos/todosSlice";
+import {RootState, useAppDispatch} from "../store";
+import {filterChanged} from "../features/filters/filtersSlice";
+import StatusFilters from "./StatusFilters";
 
 const TodoList = (): ReactElement => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
+    const todoIds = useSelector(selectFilteredTodoIds);
     const loadingStatus = useSelector((state: RootState) => state.todos.status);
     const error = useSelector((state: RootState) => state.todos.error);
+    const appliedFilter = useSelector((state: RootState) => state.filters);
     const completedTodosIds = useSelector(selectorCompletedTodos);
 
     useEffect(() => {
@@ -21,56 +22,26 @@ const TodoList = (): ReactElement => {
         }
     }, [loadingStatus, dispatch]);
 
-    //taskId by mali byt dynamicky generovane podla filtra
-    //takze selector musi byt dynamicke generovany podla toho, ktory filter je v STATE
-    const todoIds = useSelector(selectorTodoIds, shallowEqual);
     const renderTasks = () => {
         return todoIds.map((id: string) => <TodoListItem key={`todo-${id}`} id={id} />);
-    };
-
-    const handleClick = (key: string) => {
-        // switch(key) {
-        //     case "all":
-        //         return {
-        //             const completedTodos = useSelector(selectorCompletedTodos);
-        //         };
-        //     case "active": {}
-        //     case "completed": {}
-        //     default: return {};
-        // }
-    };
-
-    const handleAllClicked = () => {
-        console.log("handleAllClicked");
-    };
-
-    const handleActiveClicked = () => {
-        console.log("handleActiveClicked");
-    };
-
-    const handleCompletedClicked = () => {
-        console.log("handleCompletedClicked");
     };
 
     const handleClearCompletedClicked = () => {
         completedTodosIds.map(id => dispatch(deleteTodo(id)));
     };
 
+    const onFilterChange = (appliedFilter: string) =>
+        dispatch(filterChanged(appliedFilter));
+
     return (
         <div>
-            {/*<ListHeader/>*/}
             <TodoInput />
             <ul>
-                {(loadingStatus === "loading") ? <div>Loading...</div> : ""}
-                {(loadingStatus === "succeeded") ? renderTasks() : ""}
-                {(loadingStatus === "failed") ? <div>{error}</div> : ""}
+                {(loadingStatus === "loading") ? <div>Loading...</div> : null}
+                {(loadingStatus === "succeeded") ? renderTasks() : null}
+                {(loadingStatus === "failed") ? <div>{error}</div> : null}
             </ul>
-
-            {/*<Filter />*/}
-            <button onClick={handleAllClicked}>All</button>
-            <button onClick={handleActiveClicked}>Active</button>
-            <button onClick={handleCompletedClicked}>Completed</button>
-
+            <StatusFilters value={appliedFilter} handleClick={onFilterChange}/>
             {(completedTodosIds.length > 0)
                 ? <button onClick={handleClearCompletedClicked}>
                     Clear Completed

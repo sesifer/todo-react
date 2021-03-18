@@ -1,17 +1,18 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {BASE_URL} from "../../api/useRequest";
+
 import {Todo, TodosState} from "./types";
 import {RootState} from "../../store";
 import {createSelector} from "reselect";
+import {Filters} from "../filters/filtersSlice";
+import {BASE_URL, client} from "../../api/client";
 
 // asynchronous thunk to fetch tasks
 export const fetchTodos = createAsyncThunk(
     "todos/fetchTodos",
     async () => {
-        const response = await fetch(BASE_URL);
-        const data = await response.json();
+        const response = await client.get(BASE_URL);
 
-        return data as Todo[];
+        return response;
     }
 );
 
@@ -20,17 +21,9 @@ export const addNewTodo = createAsyncThunk(
     "todos/addNewTodo",
     async (text: string) => {
         const requestData = { text: text };
-        const response = await fetch(BASE_URL, {
-            method: "POST",
-            headers: {
-                "Accept": "application/json",
-                "Content-type": "application/json"
-            },
-            body: JSON.stringify(requestData)
-        });
-        const data = await response.json();
+        const response = await client.post(BASE_URL, requestData);
 
-        return data as Todo;
+        return response;
     }
 );
 
@@ -38,9 +31,7 @@ export const addNewTodo = createAsyncThunk(
 export const deleteTodo = createAsyncThunk(
     "todos/deleteTodo",
     async (id: string) => {
-        await fetch(`${BASE_URL}/${id}`, {
-            method: "DELETE",
-        });
+        await client.delete(`${BASE_URL}/${id}ddd`);
 
         return id;
     }
@@ -51,13 +42,9 @@ export const completeTodo = createAsyncThunk(
     "todos/completeTodo",
     async ({ id, isTodoCompleted }: { id: string, isTodoCompleted: boolean }) => {
         const completionAction = isTodoCompleted ? "incomplete" : "complete";
-        const response = await fetch(`${BASE_URL}/${id}/${completionAction}`, {
-            method: "POST",
-        });
+        const response = await client.post(`${BASE_URL}/${id}/${completionAction}`);
 
-        const data = await response.json();
-
-        return data as Todo;
+        return response;
     }
 );
 
@@ -66,37 +53,16 @@ export const updateTodo = createAsyncThunk(
     "todos/updateTodo",
     async ({ id, text }: { id: string, text: string }) => {
         const requestData = { text: text };
-        const response = await fetch(`${BASE_URL}/${id}`, {
-            method: "POST",
-            headers: {
-                "Accept": "application/json",
-                "Content-type": "application/json"
-            },
-            body: JSON.stringify(requestData)
-        });
+        const response = await client.post(`${BASE_URL}/${id}`, requestData);
 
-        const data = await response.json();
-
-        return data as Todo;
-    }
-);
-
-// potrebujem to?
-// asynchronous thunk to get all completed tasks
-export const getAllCompletedTodos = createAsyncThunk<Todo[]>(
-    "todos/getAllCompletedTodos",
-    async () => {
-        const response = await fetch(`${BASE_URL}/completed`);
-        const data = await response.json();
-
-        return data;
+        return response;
     }
 );
 
 const initialState: TodosState = {
     todos: [],
     status: "idle",
-    error: null
+    error: undefined,
 };
 
 export const todosSlice = createSlice({
@@ -112,8 +78,9 @@ export const todosSlice = createSlice({
                 state.status = "succeeded";
                 state.todos = [...payload];
             })
-            .addCase(fetchTodos.rejected, (state) => {
+            .addCase(fetchTodos.rejected, (state: TodosState, action) => {
                 state.status = "failed";
+                state.error = action.error.message;
             })
             .addCase(addNewTodo.fulfilled, (state, {payload}) => {
                 state.todos = [...state.todos, payload];
@@ -139,25 +106,27 @@ export const action = todosSlice.actions;
 
 export default todosSlice.reducer;
 
-//selectors
-export const selectorAllTodos = (state: RootState) => state.todos.todos;
-
-export const selectorTodoIds = (state: RootState) => state.todos.todos.map((todo: Todo) => todo.id);
-
+/************************SELECTORS************************/
 export const selectorFilteredTodos = createSelector(
     (state: RootState) => state.todos.todos,
     (state:RootState) => state.filters,
     (todos, status) => {
-        //todo dopis filtre
-        if (status === filters.all) {
+        if (status === Filters.All) {
             return todos;
         }
+        if (status === Filters.Completed) {
+            return todos.filter(todo => todo.completed);
+        }
+
+        //return active todos
+        return todos.filter(todo => !todo.completed);
     }
 );
-//pozrie sa co za filter je aktivny
-//ak je active zavola selector na NOT completed todos
-// compelted >>> zavola completedTodosIds
 
+export const selectFilteredTodoIds = createSelector(
+    selectorFilteredTodos,
+    (filteredTodos) => filteredTodos.map((todo) => todo.id)
+);
 
 export const selectorCompletedTodos = (state: RootState): string[] => {
     const completedTodosIds = state.todos.todos
@@ -166,3 +135,19 @@ export const selectorCompletedTodos = (state: RootState): string[] => {
 
     return completedTodosIds;
 };
+
+export const selectTodoById = (state: RootState, todoId: string) => {
+    const selectedTodo = state.todos.todos.find((todo: Todo) => todo.id === todoId);
+
+    if (selectedTodo) {
+        return selectedTodo;
+    }
+};
+
+export const makeSelectorCompletedTodosCount = () =>
+    createSelector(
+        (state: RootState) => state.todos.todos,
+        (_: any, completed: boolean) => completed,
+        (todos: Todo[], completed: boolean) =>
+            todos.filter(todo => todo.completed === completed).length
+    );

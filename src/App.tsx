@@ -1,24 +1,49 @@
 import React from "react";
 import TodoList from "./components/TodoList";
+import styled from "@emotion/styled";
+import {fontFamily, fontSize} from "./components/theme/fonts";
 
-//todo
-//https://swr.vercel.app/docs/prefetching
-//<link rel="preload" href="/api/data" as="fetch" crossorigin="anonymous">
+const ContentContainer = styled.div`
+  font-family: ${fontFamily.specialElite};
+  font-size: ${fontSize.body};
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+`;
+
+const Header = styled.header`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem;
+  padding: 1rem;
+`;
+
+const Title = styled.div`
+  font-size: ${fontSize.title};
+`;
+
+const Footer = styled.footer`
+  position: absolute;
+  bottom: 0;
+`;
 
 function App():JSX.Element {
 
     return (
-        <React.Fragment>
-            <header>
-               TODO LIST
-            </header>
+        <ContentContainer>
+            <Header>
+                <Title>TODO LIST</Title>
+                <Title>__________</Title>
+            </Header>
             <main>
                 <TodoList/>
             </main>
-            <footer>
-                <p>©Copyright 2050 by nobody. All rights reversed. This was fun!</p>
-            </footer>
-        </React.Fragment>
+            <Footer>
+                <p>©Copyright 2050 by Džu. All rights reversed. This was fun!</p>
+            </Footer>
+        </ContentContainer>
     );
 }
 

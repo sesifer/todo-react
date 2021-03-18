@@ -1,16 +1,7 @@
 import {useSelector} from "react-redux";
-import {createSelector} from "reselect";
 import React, {useMemo} from "react";
-import {Todo} from "../features/todos/types";
 import {RootState} from "../store";
-
-const makeSelectorCompletedTodosCount = () =>
-    createSelector(
-        (state:RootState) => state.todos.todos,
-        (_: any, completed: boolean) => completed,
-        (todos: Todo[], completed: boolean) =>
-            todos.filter(todo => todo.completed === completed).length
-    );
+import {makeSelectorCompletedTodosCount} from "../features/todos/todosSlice";
 
 interface Props {
     completed: boolean
@@ -18,12 +9,11 @@ interface Props {
 
 const CompletedTodosCount = ({ completed }: Props) => {
     const selectCompletedTodosCount = useMemo(makeSelectorCompletedTodosCount, []);
-
-    const matchingCount = useSelector((state :RootState) =>
+    const count = useSelector((state: RootState) =>
         selectCompletedTodosCount(state, completed)
     );
 
-    return <div>{matchingCount}</div>;
+    return <div>{count}</div>;
 };
 
 export default CompletedTodosCount;

@@ -1,23 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const filters = {
-    all: "all",
-    active: "active",
-    completed: "completed"
+export const Filters: {[index: string]: string} = {
+    All: "all",
+    Active: "active",
+    Completed: "completed"
 };
 
-const initialState = filters.all;
+const initialState: string = Filters.All;
 
 export const filtersSlice = createSlice({
     name: "filters",
     initialState,
     reducers: {
-        filterChanged: (state, action) => {
-            state = action.payload;
-        }
+        filterChanged: (state, {payload}) => state = payload
     }
 });
 
-export const filterChanged = filtersSlice.actions;
+export const {filterChanged} = filtersSlice.actions;
 
 export default filtersSlice.reducer;
