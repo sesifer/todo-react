@@ -9,27 +9,24 @@ const CountersContainer = styled.div`
   padding: 1em;
 `;
 
-const Counter = styled.span`
+export const Span = styled.span`
   display: flex;
   padding: 0.5em;
-  & first-child {
-  padding-right: 0.5em;
-}
 `;
 
 const TodoListFooter = ():JSX.Element => {
 
     return (
         <CountersContainer>
-            <Counter>
+            <Span>
                 <CompletedTasksCounter completed={true} />
-                <span>items done</span>
-            </Counter>
-            <Counter>
+                <Span>items done</Span>
+            </Span>
+            <Span>
                 <CompletedTasksCounter completed={false} />
-                <span>items left</span>
-            </Counter>
-            //todo zmen favicon
+                <Span>items left</Span>
+            </Span>
+            {/*todo zmen favicon*/}
         </CountersContainer>
     );
 };

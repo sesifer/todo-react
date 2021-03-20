@@ -31,7 +31,7 @@ export const addNewTodo = createAsyncThunk(
 export const deleteTodo = createAsyncThunk(
     "todos/deleteTodo",
     async (id: string) => {
-        await client.delete(`${BASE_URL}/${id}ddd`);
+        await client.delete(`${BASE_URL}/${id}`);
 
         return id;
     }

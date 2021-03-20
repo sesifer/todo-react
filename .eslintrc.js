@@ -59,6 +59,6 @@ module.exports = {
         "max-len": ["warn", 120, 4],
         "import/extensions": [0, "never", {"ts": "never"}],
         "react-hooks/rules-of-hooks": "error",
-        "react-hooks/exhaustive-deps": "warn"
+        "react-hooks/exhaustive-deps": "warn",
     }
 };
