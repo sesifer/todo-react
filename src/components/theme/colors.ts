@@ -17,9 +17,3 @@ export const boxShadow = {
         0 32px 64px rgba(0,0,0,0.07)
     `
 };
-
-// xs, extra-small: 0px
-// sm, small: 600px
-// md, medium: 960px
-// lg, large: 1280px
-// xl, extra-large: 1920px

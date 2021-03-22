@@ -1,11 +1,11 @@
-import {useSelector} from "react-redux";
 import React, {useMemo} from "react";
 import {RootState} from "../store";
 import {makeSelectorCompletedTodosCount} from "../features/todos/todosSlice";
 import styled from "@emotion/styled";
 import {colors} from "./theme/colors";
+import {useSelector} from "react-redux";
 
-const Number = styled.div`
+const StyledDiv = styled.div`
   padding: 0.5em;
   color: ${colors.steelTeal};
   -webkit-transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -25,7 +25,7 @@ const CompletedTodosCount = ({ completed }: Props) => {
         selectCompletedTodosCount(state, completed)
     );
 
-    return <Number>{count}</Number>;
+    return <StyledDiv>{count}</StyledDiv>;
 };
 
 export default CompletedTodosCount;

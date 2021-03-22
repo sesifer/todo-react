@@ -1,17 +1,27 @@
-import React, {ReactElement, useEffect} from "react";
+import React, {ReactElement, useEffect, useRef} from "react";
 import {useSelector} from "react-redux";
 import TodoInput from "./TodoInput";
-import TodoListItem, {DeleteButton} from "./TodoListItem";
-import TodoListFooter, {Span} from "./TodoListFooter";
-import {deleteTodo, fetchTodos, selectFilteredTodoIds, selectorCompletedTodos} from "../features/todos/todosSlice";
+import TodoListItem from "./TodoListItem";
+import TodoListFooter, {StyledSpan} from "./TodoListFooter";
+import {
+    completedTodosSelector,
+    completeTodo,
+    deleteTodo,
+    fetchTodos,
+    incompleteTodosSelector,
+    selectFilteredTodoIds,
+} from "../features/todos/todosSlice";
 import {RootState, useAppDispatch} from "../store";
-import {filterChanged} from "../features/filters/filtersSlice";
 import StatusFilters from "./StatusFilters";
 import styled from "@emotion/styled";
 import {fontFamily} from "./theme/fonts";
+import Notification from "./Notification";
+import DeleteButton from "./buttons/DeleteButton";
+import Button from "./buttons/Button";
+import {StyledDiv} from "./Header";
 
 const Content = styled.div`
-  display: flex;
+  display: flex; 
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
@@ -20,52 +30,88 @@ const Content = styled.div`
 `;
 
 const List = styled.ul`
-  width: 40vw;
   margin: auto;
   text-align: center;
 `;
 
+const ActionButtonsContainer = styled.div`
+  margin: 1em;
+`;
+
 const TodoList = (): ReactElement => {
+    const _isMounted = useRef(true);
     const dispatch = useAppDispatch();
-    const todoIds = useSelector(selectFilteredTodoIds);
+
+    const filteredTodoIds = useSelector(selectFilteredTodoIds);
+    const completedTodosIds = useSelector(completedTodosSelector);
+    const incompleteTodos = useSelector(incompleteTodosSelector);
+
     const loadingStatus = useSelector((state: RootState) => state.todos.status);
     const error = useSelector((state: RootState) => state.todos.error);
     const appliedFilter = useSelector((state: RootState) => state.filters);
-    const completedTodosIds = useSelector(selectorCompletedTodos);
 
     useEffect(() => {
         if (loadingStatus === "idle") {
             dispatch(fetchTodos());
         }
+
+        return () => {
+            _isMounted.current = false;
+        };
     }, [loadingStatus, dispatch]);
 
-    const renderTasks = () => {
-        return todoIds.map((id: string) => <TodoListItem key={`todo-${id}`} id={id} />);
-    };
+    const renderTasks = filteredTodoIds.map((id: string) => <TodoListItem key={`todo-${id}`} id={id} />);
 
     const handleClearCompletedClicked = () => {
         completedTodosIds.map(id => dispatch(deleteTodo(id)));
     };
 
-    const onFilterChange = (appliedFilter: string) =>
-        dispatch(filterChanged(appliedFilter));
+    const handleToggleCompleteAll = () => {
+
+        if (incompleteTodos.length > 0) {
+            const isTodoCompleted = false;
+
+            incompleteTodos.map(id => dispatch(completeTodo({id, isTodoCompleted})));
+        } else {
+            const isTodoCompleted = true;
+            completedTodosIds.map(id => dispatch(completeTodo({id, isTodoCompleted})));
+        }
+    };
+
+    const showNotification = () => {
+        if (loadingStatus === "loading") {
+            return <Notification type={"info"} text={"Loading..."}/>;
+        }
+        if (loadingStatus === "failed") {
+            return <Notification type={"error"} text={error}/>;
+        }
+    };
 
     return (
         <Content>
             <TodoInput />
             <List>
-                {(loadingStatus === "loading") ? <li>Loading...</li> : null}
-                {(loadingStatus === "succeeded") ? renderTasks() : null}
-                {(loadingStatus === "failed") ? <li>{error}</li> : null}
+                {renderTasks}
             </List>
-            <Span>.</Span>
-            <StatusFilters value={appliedFilter} handleClick={onFilterChange}/>
-            {(completedTodosIds.length > 0)
-                ? <DeleteButton onClick={handleClearCompletedClicked}>
-                    Clear Completed
-                </DeleteButton>
-                : null
-            }
+            {showNotification()}
+            <StyledSpan>.</StyledSpan>
+            <StatusFilters />
+            <StyledDiv>____________</StyledDiv>
+            <ActionButtonsContainer>
+                {(appliedFilter === "all" && filteredTodoIds.length > 0)
+                    ? <Button
+                        id={"completeAll"}
+                        handleClick={handleToggleCompleteAll}
+                    >
+                        {incompleteTodos.length > 0 ? "Complete All" : "Uncheck All"}
+                    </Button>
+                    : null
+                }
+                {(completedTodosIds.length > 0 && (appliedFilter === "all" || appliedFilter === "completed"))
+                    ? <DeleteButton handleClick={handleClearCompletedClicked}>Clear Completed</DeleteButton>
+                    : null
+                }
+            </ActionButtonsContainer>
             <TodoListFooter/>
         </Content>
     );

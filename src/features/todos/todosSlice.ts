@@ -1,5 +1,4 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-
 import {Todo, TodosState} from "./types";
 import {RootState} from "../../store";
 import {createSelector} from "reselect";
@@ -94,9 +93,10 @@ export const todosSlice = createSlice({
                 };
             })
             .addCase(completeTodo.fulfilled, (state, {payload}) => {
-                const todo = state.todos.find((todo) => todo.id === payload.id);
+                const todoId = payload.id;
+                const todo = state.todos.find(todo => todo.id === todoId);
                 if (todo) {
-                    todo.completed = payload.completed;
+                    todo.completed = !todo.completed;
                 }
             });
     }
@@ -107,41 +107,43 @@ export const action = todosSlice.actions;
 export default todosSlice.reducer;
 
 /************************SELECTORS************************/
-export const selectorFilteredTodos = createSelector(
+export const makeFilteredTodosSelector = createSelector(
     (state: RootState) => state.todos.todos,
     (state:RootState) => state.filters,
-    (todos, status) => {
+    (todos, status): Todo[] => {
         if (status === Filters.All) {
-            return todos;
+            return [...todos];
         }
         if (status === Filters.Completed) {
             return todos.filter(todo => todo.completed);
         }
 
-        //return active todos
+        //return incomplete(active) todos
         return todos.filter(todo => !todo.completed);
     }
 );
 
 export const selectFilteredTodoIds = createSelector(
-    selectorFilteredTodos,
-    (filteredTodos) => filteredTodos.map((todo) => todo.id)
+    makeFilteredTodosSelector,
+    (filteredTodos: Todo[]): string[] => filteredTodos.map((todo) => todo.id)
 );
 
-export const selectorCompletedTodos = (state: RootState): string[] => {
-    const completedTodosIds = state.todos.todos
+export const completedTodosSelector = createSelector(
+    (state: RootState) => state.todos.todos,
+    (todos) => todos
         .filter(todo => todo.completed)
-        .map(todo => todo.id);
+        .map(todo => todo.id)
+);
 
-    return completedTodosIds;
-};
+export const incompleteTodosSelector = createSelector(
+    (state: RootState) => state.todos.todos,
+    (todos) => todos
+        .filter(todo => !todo.completed)
+        .map(todo => todo.id)
+);
 
 export const selectTodoById = (state: RootState, todoId: string) => {
-    const selectedTodo = state.todos.todos.find((todo: Todo) => todo.id === todoId);
-
-    if (selectedTodo) {
-        return selectedTodo;
-    }
+    return state.todos.todos.find((todo) => todo.id === todoId);
 };
 
 export const makeSelectorCompletedTodosCount = () =>
@@ -150,4 +152,15 @@ export const makeSelectorCompletedTodosCount = () =>
         (_: any, completed: boolean) => completed,
         (todos: Todo[], completed: boolean) =>
             todos.filter(todo => todo.completed === completed).length
+    );
+
+//selector to return ids of all completed todos
+export const makeSelectorCompletedTodoIds = () =>
+    createSelector(
+        (state: RootState) => state.todos.todos,
+        (_: any, completed: boolean) => completed,
+        (todos: Todo[], completed: boolean) =>
+            todos
+                .filter(todo => todo.completed === completed)
+                .map(todo => todo.id)
     );

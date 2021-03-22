@@ -1,5 +1,5 @@
 import React from "react";
-import CompletedTasksCounter from "./CompletedTodosCounter";
+import CompletedTasksCounter from "./CompletedTodosCount";
 import styled from "@emotion/styled";
 
 const CountersContainer = styled.div`
@@ -9,7 +9,7 @@ const CountersContainer = styled.div`
   padding: 1em;
 `;
 
-export const Span = styled.span`
+export const StyledSpan = styled.span`
   display: flex;
   padding: 0.5em;
 `;
@@ -17,17 +17,19 @@ export const Span = styled.span`
 const TodoListFooter = ():JSX.Element => {
 
     return (
-        <CountersContainer>
-            <Span>
-                <CompletedTasksCounter completed={true} />
-                <Span>items done</Span>
-            </Span>
-            <Span>
-                <CompletedTasksCounter completed={false} />
-                <Span>items left</Span>
-            </Span>
-            {/*todo zmen favicon*/}
-        </CountersContainer>
+        <React.Fragment>
+            <CountersContainer>
+                <StyledSpan>
+                    <CompletedTasksCounter completed={true} />
+                    <StyledSpan>items done</StyledSpan>
+                </StyledSpan>
+                <StyledSpan>
+                    <CompletedTasksCounter completed={false} />
+                    <StyledSpan>items left</StyledSpan>
+                </StyledSpan>
+            </CountersContainer>
+            <p>Double-click to edit a todo</p>
+        </React.Fragment>
     );
 };
 

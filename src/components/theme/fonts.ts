@@ -9,9 +9,3 @@ export const fontSize = {
     subtitle: "32px",
     title: "64px",
 };
-
-export const lineHeight = {
-    body: "16px",
-    subtitle: "32px",
-    title: "64px",
-};

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {completeTodo, deleteTodo, selectTodoById, updateTodo} from "../features/todos/todosSlice";
 import {RootState, useAppDispatch} from "../store";
 import {useSelector} from "react-redux";
@@ -7,8 +7,10 @@ import Notification from "./Notification";
 import styled from "@emotion/styled";
 import {fontFamily, fontSize} from "./theme/fonts";
 import {boxShadow, colors} from "./theme/colors";
+import DeleteButton from "./buttons/DeleteButton";
 
 const TodoContainer = styled.div`
+  position: relative;
   font-size: ${fontSize.body};
   display: flex;
   font-size: ${fontSize.subtitle};
@@ -44,12 +46,19 @@ const Container = styled.label<LabelProps>`
 const Checkbox = styled.input`
   position: absolute;
   opacity: 0;
+  z-index: 99; //move it forward to be clickable 
+  margin: 0;
   cursor: pointer;
-  height: 0;
-  width: 0;
+  top: 0.6rem;
+  @media (max-width: 620px) {
+    top: 0.2rem;
+  }
+  left: 0;
+  height: 1.5rem;
+  width: 1.5rem;
   /* When the checkbox is checked, add a thistle background */
   &:checked ~ span {
-    background-color: ${colors.steelTeal};X
+    background-color: ${colors.steelTeal};
   }
   /* Show the checkmark when checked */
   &:checked ~ span::after {
@@ -59,10 +68,13 @@ const Checkbox = styled.input`
 
 const Checkmark = styled.span`
   position: absolute;
-  top: 0;
+  top: 0.6rem;
+  @media (max-width: 620px) {
+    top: 0.2rem;
+  }
   left: 0;
-  height: 25px;
-  width: 25px;
+  height: 1.5rem;
+  width: 1.5rem;
   background-color: ${colors.thistleSoft};
   -webkit-transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
   transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -95,42 +107,28 @@ const EditInput = styled.input`
   line-height: 21px;
 `;
 
-export const DeleteButton = styled.button`
-  font-family: ${fontFamily.specialElite};
-  font-size: ${fontSize.body};
-  border: none;
-  background: none;
-  color: ${colors.goldenGateBridge};
-  -webkit-transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-  transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-  &:before {
-    content: ">";
-    margin: 0.2em;
-  }
-  &:after {
-    content: "<";
-    margin: 0.2em;
-  }
-  &:hover{
-    box-shadow: ${boxShadow.dreamy};
-    background-color: ${colors.thistleSoft};
-  }
-  &:focus {
-    outline: none;
-  }
-`;
-
 interface TodoListItemProps {
     id: string;
 }
 
 const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
+    const _isMounted = useRef(true);
     const dispatch = useAppDispatch();
     const todo = useSelector((state: RootState) => selectTodoById(state, id));
+
     const [inputToggle, setInputToggle] = useState(false);
-    const [isTodoCompleted, toggleCompleted] = useState(!!todo?.completed);
+
+    const [isTodoCompleted, toggleCompleted] = useState(!!(todo?.completed));
     const [input, setInput] = useState(todo?.text);
     const [requestStatus, setRequestStatus] = useState("idle");
+
+    useEffect(() => {
+        toggleCompleted(!!(todo?.completed));
+
+        return () => {
+            _isMounted.current = false;
+        };
+    }, [todo, dispatch]);
 
     const handleDoubleClick = () => {
         setInputToggle(!inputToggle);
@@ -138,8 +136,9 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
     };
 
     const handleCompleted = () => {
-        toggleCompleted(!isTodoCompleted);
         dispatch(completeTodo({id, isTodoCompleted}));
+        toggleCompleted(!isTodoCompleted);
+        
     };
 
     const handleDelete = async () => {
@@ -176,7 +175,16 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
     return (
         <li>
             <TodoContainer>
-                {/*todo fix doubleclick vs compelted*/}
+                <Checkbox
+                    id={`checkbox-${id}`}
+                    name={"itemCheckbox"}
+                    type={"checkbox"}
+                    value={">"}
+                    onChange={handleCompleted}
+                    checked={isTodoCompleted}
+                    disabled={inputToggle}
+                />
+                <Checkmark></Checkmark>
                 <Container  onDoubleClick={handleDoubleClick} checked={isTodoCompleted}>
                     {inputToggle
                         ? <EditInput
@@ -190,20 +198,10 @@ const TodoListItem = ({ id } :TodoListItemProps):JSX.Element => {
                         />
                         : input
                     }
-                    <Checkbox
-                        id={`checkbox-${id}`}
-                        name={"itemCheckbox"}
-                        type={"checkbox"}
-                        value={">"}
-                        onChange={handleCompleted}
-                        checked={isTodoCompleted}
-                        disabled={inputToggle}
-                    />
-                    <Checkmark></Checkmark>
                 </Container>
                 {inputToggle
                     ? null
-                    : <DeleteButton onClick={handleDelete}>x</DeleteButton>
+                    : <DeleteButton handleClick={handleDelete}>x</DeleteButton>
                 }
                 {isLoading ? <Notification type={"info"} text={"Loading..."} /> : null}
                 {isFailed ? <Notification type={"error"} /> : null}
