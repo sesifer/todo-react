@@ -25,8 +25,6 @@ export const client = async (endpoint: string, {body, method, ...customConfig} =
 
     let data;
     try{
-        // eslint-disable-next-line no-debugger
-
         const response = await window.fetch(endpoint, config);
         if (!response.ok) {
             throw new Error(response.statusText);

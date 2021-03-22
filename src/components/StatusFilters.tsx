@@ -16,15 +16,12 @@ const ButtonsContainer = styled.div`
 const StatusFilters = () => {
     const dispatch = useAppDispatch();
     const appliedFilter = useSelector((state: RootState) => state.filters);
-    console.log("appliedFilter:",appliedFilter);
+
     const onFilterChange = (appliedFilter: string) =>
         dispatch(filterChanged(appliedFilter));
 
     const filterButtons = Object.keys(Filters).map(key => {
-        // eslint-disable-next-line no-debugger
-        debugger;
         const value = Filters[key];
-        console.log("value:",value);
 
         const onClick = () => onFilterChange(value);
         const highlight = (value === appliedFilter) || false;
