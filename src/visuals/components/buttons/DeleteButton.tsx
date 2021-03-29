@@ -6,14 +6,14 @@ interface DeleteButtonProps {
     children: string;
 }
 
-const DeleteButton = (props: DeleteButtonProps) => {
+const DeleteButton = ({ handleClick, children }: DeleteButtonProps) => {
 
     return <Button
-        handleClick={props.handleClick}
+        handleClick={handleClick}
         id={"deleteButton"}
         actionType={"danger"}
     >
-        {props.children}
+        {children}
     </Button>;
 };
 

@@ -1,8 +1,8 @@
 import React from "react";
-import {filterChanged, Filters} from "../features/filters/filtersSlice";
+import {filterChanged, Filters} from "./filters/filtersSlice";
 import styled from "@emotion/styled";
-import {colors} from "./theme/colors";
-import Button from "./buttons/Button";
+import {colors} from "../visuals/theme/colors";
+import Button from "../visuals/components/buttons/Button";
 import {useSelector} from "react-redux";
 import {RootState, useAppDispatch} from "../store";
 

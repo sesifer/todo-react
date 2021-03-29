@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
-import {fontFamily, fontSize} from "../theme/fonts";
-import {boxShadow, colors} from "../theme/colors";
+import {fontFamily, fontSize} from "../../theme/fonts";
+import {boxShadow, colors} from "../../theme/colors";
 
 interface StyledButtonProps {
     actionType?: string;

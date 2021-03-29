@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-nocheck
+// @ts-nocheck
 /**
  * Fetch won't handle client response errors so I borrowed a small wrap from
  * https://kentcdodds.com/blog/replace-axios-with-a-simple-custom-fetch-wrapper
@@ -9,50 +9,48 @@ const GET = "GET";
 const POST = "POST";
 const DELETE = "DELETE";
 
-export const client = async (endpoint: string, {body, method, ...customConfig} = {}) => {
+export const client = async (endpoint: string, {body, method} = {}) => {
     const headers = {"Content-Type": "application/json"};
     const config = {
         method: method,
-        ...customConfig,
         headers: {
             ...headers,
-            ...customConfig.headers,
         },
     };
     if (body) {
         config.body = JSON.stringify(body);
     }
 
-    let data;
     try{
         const response = await window.fetch(endpoint, config);
         if (!response.ok) {
             throw new Error(response.statusText);
         }
-        if (method === DELETE) {
 
-            return "";
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+
+            return await response.json();
         }
-       
-        data = await response.json();
-        return data;
+
+        return;
     } catch (e) {
 
-        return Promise.reject(e.message || data);
+        return Promise.reject(e.message);
     }
 };
 
-client.get = (endpoint, customConfig = {}) => {
+client.get = (endpoint) => {
 
-    return client(endpoint, { ...customConfig, method: GET });
+    return client(endpoint, { method: GET });
 };
 
-client.post = (endpoint, body = {}, customConfig = {}) => {
+client.post = (endpoint, body = {}) => {
 
-    return client(endpoint, { ...customConfig, body, method: POST });
+    return client(endpoint, { body, method: POST });
 };
 
-client.delete = (endpoint, customConfig = {}) => {
+client.delete = (endpoint) => {
 
-    return client(endpoint, { ...customConfig, method: DELETE });
+    return client(endpoint, { method: DELETE });
 };

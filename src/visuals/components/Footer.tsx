@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "@emotion/styled";
-import {fontSize} from "./theme/fonts";
+import {fontSize} from "../theme/fonts";
 
 const FooterContainer = styled.footer`
   position: absolute;

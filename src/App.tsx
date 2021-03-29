@@ -1,10 +1,10 @@
 import React from "react";
-import TodoList from "./components/TodoList";
+import TodoList from "./features/TodoList";
 import styled from "@emotion/styled";
-import {fontFamily, fontSize} from "./components/theme/fonts";
-import {colors} from "./components/theme/colors";
-import Footer from "./components/Footer";
-import Header from "./components/Header";
+import {fontFamily, fontSize} from "./visuals/theme/fonts";
+import {colors} from "./visuals/theme/colors";
+import Footer from "./visuals/components/Footer";
+import Header from "./visuals/components/Header";
 
 const ContentContainer = styled.div`
   font-family: ${fontFamily.specialElite};

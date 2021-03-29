@@ -1,4 +1,4 @@
-// default fonts
+/**default fonts**/
 export const fontFamily = {
     specialElite: "'Special Elite', cursive, sans-serif",
     roboto: "'Roboto',sans-serif",

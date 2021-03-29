@@ -1,8 +1,8 @@
 import React, {useMemo} from "react";
 import {RootState} from "../store";
-import {makeSelectorCompletedTodosCount} from "../features/todos/todosSlice";
+import {makeSelectorCompletedTodosCount} from "./todos/todosSlice";
 import styled from "@emotion/styled";
-import {colors} from "./theme/colors";
+import {colors} from "../visuals/theme/colors";
 import {useSelector} from "react-redux";
 
 const StyledDiv = styled.div`
@@ -15,11 +15,11 @@ const StyledDiv = styled.div`
   }
 `;
 
-interface Props {
+interface CompletedTodosCountProps {
     completed: boolean
 }
 
-const CompletedTodosCount = ({ completed }: Props) => {
+const CompletedTodosCount = ({ completed }: CompletedTodosCountProps) => {
     const selectCompletedTodosCount = useMemo(makeSelectorCompletedTodosCount, []);
     const count = useSelector((state: RootState) =>
         selectCompletedTodosCount(state, completed)
